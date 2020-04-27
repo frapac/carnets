@@ -1,6 +1,6 @@
 test:
-	g++ -O3 -g -o test mulmat.cpp
+	g++ -O3 -g -o test matmul.cpp
 assembly:
-	g++ -S -o mul.s mulmat.cpp
+	g++ -S -o mul.s matmul.cpp
 blas:
-	g++ -o blas blas.cpp
+	g++ -O3 -o blas blas.cpp -I/usr/include/x86_64-linux-gnu -lopenblas 

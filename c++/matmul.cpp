@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <cstdint>
 #include <ctime>
 #include <iostream>
@@ -27,12 +28,12 @@ void Init(T** &A, T* &x, T* &y, int size)
     for(int j=0; j<size; j++)
     for(int i=0; i<size; i++)
     {
-        A[i][j] = 0.234;
+        A[i][j] = rand();
     }
 
     for(int i=0; i<size; i++)
     {
-        x[i] = 1.234;
+        x[i] = rand();
         y[i] = 0;
     }
 }
@@ -251,13 +252,12 @@ void classic5(int size, int num)
 }
 
 int main(int argc, char** argv) {
-    int ntime;
+    int ntime = 100;
     if(argc > 1)
         ntime = atoi(argv[1]);
-    else
-        ntime = 100;
-    int size = 1024;
+    int size = 2048;
     double dtime;
+    printf("Double\n");
     classic1<double>(size, ntime);
     classic2<double>(size, ntime);
     classic3<double>(size, ntime);
