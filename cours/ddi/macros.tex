@@ -1,0 +1,145 @@
+% Ce fichier contient toutes les macros que vous pouvez avoir envie de définir
+% si vous les utilisez plusieurs fois dans le document.
+
+\PassOptionsToPackage{svgnames}{color}
+
+% Un environnement pour bien présenter le code informatique
+\newenvironment{code}{%
+\begin{mdframed}[linecolor=green,innerrightmargin=30pt,innerleftmargin=30pt,
+backgroundcolor=black!5,
+skipabove=10pt,skipbelow=10pt,roundcorner=5pt,
+splitbottomskip=6pt,splittopskip=12pt]
+}{%
+\end{mdframed}
+}
+
+
+\newcommand\N{\mathbb{N}}
+\newcommand\R{\mathbb{R}}
+\newcommand\E{\mathbb{E}}
+\newcommand\Pb{\mathbb{P}}
+\newcommand\va[1]{\mathbf{#1}}
+
+
+\newcommand{\argmin}{\mathop{\arg\min}}                     % Arg-min
+\newcommand{\st}{\text{s.t.}}                            % ``s.t.''
+
+%%%%% Math\'{e}matiques g\'{e}n\'{e}rales
+\newcommand{\defegal}{:=}                                   % D\'{e}finition
+
+\newcommand{\bgfset}[2]{\big\{#1\:\big|\:#2\big.\big\}}     % Ensemble
+\newcommand{\Bgfset}[2]{\Big\{#1\:\Big|\:#2\Big.\Big\}}
+\newcommand{\defset}[2]{\left\{#1\:\left|\:#2\right.\right\}}
+
+\newcommand{\IFF}{iff~}                                     % if and only if
+
+\newcommand{\bbN}{\mathbb{N}}                               % Entiers naturels
+\newcommand{\bbR}{\mathbb{R}}                               % Nombres r\'{e}els
+\newcommand{\bbRb}{\overline{\mathbb{R}}}                   % Completion de R
+
+\newcommand{\abs}[1]{\left|#1\right|}                       % Valeur absolue
+\newcommand{\norm}[1]{\left\|#1\right\|}                    % Norme
+\newcommand{\sqnorm}[1]{\left\|#1\right\|^{2}}              % Norme au carr\'{e}
+
+\newcommand{\dd}{\,\mathrm{d}}                              % d de derivation
+\newcommand{\dpp}[2]{\dd #1 (#2)}                           % dP(omega)
+
+\newcommand{\derpar}[2]{\frac{\partial#1}{\partial#2}}      % D\'{e}riv\'{e}e partielle
+\newcommand{\dertot}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}  % D\'{e}riv\'{e}e totale
+
+\newcommand{\projop}[1]{\mathrm{proj}_{#1}}                 % Op\'{e}rateur projection
+\newcommand{\proj}[2]{\projop{#1}\left(#2\right)}           % Projection
+\newcommand{\dist}[2]{\mathrm{dist}_{#1}\left(#2\right)}    % Distance
+
+%%%%% Parenth\`{e}ses, crochets et accolades
+
+\newcommand{\np}[1]{(#1)}                                   % Parenth\`{e}se normal
+\newcommand{\bp}[1]{\big(#1\big)}                           % Parenth\`{e}se big
+\newcommand{\Bp}[1]{\Big(#1\Big)}                           % Parenth\`{e}se Big
+\newcommand{\bgp}[1]{\bigg(#1\bigg)}                        % Parenth\`{e}se bigg
+\newcommand{\Bgp}[1]{\Bigg(#1\Bigg)}                        % Parenth\`{e}se Bigg
+
+\newcommand{\nc}[1]{[#1]}                                   % Crochet normal
+\newcommand{\bc}[1]{\big[#1\big]}                           % Crochet big
+\newcommand{\Bc}[1]{\Big[#1\Big]}                           % Crochet Big
+\newcommand{\bgc}[1]{\bigg[#1\bigg]}                        % Crochet bigg
+\newcommand{\Bgc}[1]{\Bigg[#1\Bigg]}                        % Crochet Bigg
+
+\newcommand{\na}[1]{\{#1\}}                                 % Accolade normal
+\newcommand{\ba}[1]{\big\{#1\big\}}                         % Accolade big
+\newcommand{\Ba}[1]{\Big\{#1\Big\}}                         % Accolade Big
+\newcommand{\bga}[1]{\bigg\{#1\bigg\}}                      % Accolade bigg
+\newcommand{\Bga}[1]{\Bigg\{#1\Bigg\}}                      % Accolade Bigg
+
+%%%%% Versions avec s\'{e}parateur
+
+\newcommand{\nps}[2]{\np{#1\mid#2}}                         % Parenth\`{e}se normal
+\newcommand{\bps}[2]{\bp{#1\ \big|\ #2}}                    % Parenth\`{e}se big
+\newcommand{\Bps}[2]{\Bp{#1\ \Big|\ #2}}                    % Parenth\`{e}se Big
+\newcommand{\bgps}[2]{\bgp{#1\ \bigg|\ #2}}                 % Parenth\`{e}se bigg
+\newcommand{\Bgps}[2]{\Bgp{#1\ \Bigg|\ #2}}                 % Parenth\`{e}se Bigg
+
+\newcommand{\ncs}[2]{\nc{#1\mid#2}}                         % Crochet normal
+\newcommand{\bcs}[2]{\bc{#1\ \big|\ #2}}                    % Crochet big
+\newcommand{\Bcs}[2]{\Bc{#1\ \Big|\ #2}}                    % Crochet Big
+\newcommand{\bgcs}[2]{\bgc{#1\ \bigg|\ #2}}                 % Crochet bigg
+\newcommand{\Bgcs}[2]{\Bgc{#1\ \Bigg|\ #2}}                 % Crochet Bigg
+
+\newcommand{\nas}[2]{\na{#1\mid#2}}                         % Accolade normal
+\newcommand{\bas}[2]{\ba{#1\ \big|\ #2}}                    % Accolade big
+\newcommand{\Bas}[2]{\Ba{#1\ \Big|\ #2}}                    % Accolade Big
+\newcommand{\bgas}[2]{\bga{#1\ \bigg|\ #2}}                 % Accolade bigg
+\newcommand{\Bgas}[2]{\Bga{#1\ \Bigg|\ #2}}                 % Accolade Bigg
+
+%%%%% Raccourcis package maths
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cY}{\mathcal{Y}}
+\newcommand{\cZ}{\mathcal{Z}}
+
+\newcommand{\BB}{\mathbb{B}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\HH}{\mathbb{H}}
+\newcommand{\II}{\mathbb{I}}
+\newcommand{\JJ}{\mathbb{J}}
+\newcommand{\KK}{\mathbb{K}}
+\newcommand{\LL}{\mathbb{L}}
+\newcommand{\MM}{\mathbb{M}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\OO}{\mathbb{O}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\UU}{\mathbb{U}}
+\newcommand{\VV}{\mathbb{V}}
+\newcommand{\WW}{\mathbb{W}}
+\newcommand{\XX}{\mathbb{X}}
+\newcommand{\YY}{\mathbb{Y}}
+\newcommand{\ZZ}{\mathbb{Z}}

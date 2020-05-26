@@ -1,0 +1,212 @@
+\documentclass[10pt]{beamer}
+
+\usecolortheme{seahorse}
+
+% pour utiliser une police à empattements partout
+\usefonttheme{serif}
+
+% pour rajouter la numérotation des frames dans les pieds de page
+\newcommand*\oldmacro{}%
+\let\oldmacro\insertshorttitle%
+\renewcommand*\insertshorttitle{%
+  \oldmacro\hfill%
+  \insertframenumber\,/\,\inserttotalframenumber}
+
+}
+
+\usepackage{graphicx} % allows including images
+\usepackage{booktabs} % allows the use of \toprule, \midrule and \bottomrule in tables
+
+\atbeginsection[]
+{
+\begin{frame}{plan}
+\tableofcontents[currentsection]
+\end{frame}
+}
+\input{preambule/special_beamer.tex}
+
+\usepackage{natbib}         % Pour la bibliographie
+\usepackage{url}            % Pour citer les adresses web
+\usepackage[utf8]{inputenc} % Lui aussi
+\usepackage[frenchb]{babel} % Pour la traduction française
+\usepackage{numprint}       % Histoire que les chiffres soient bien
+
+\usepackage{amsmath}        % La base pour les maths
+\usepackage{mathrsfs}       % Quelques symboles supplémentaires
+\usepackage{amssymb}        % encore des symboles.
+\usepackage{amsfonts}       % Des fontes, eg pour \mathbb.
+
+\usepackage{pifont}
+\usepackage{cancel}
+\usepackage{hhline}
+
+
+\usepackage{graphicx} % inclusion des graphiques
+
+\usepackage{tikz}
+\usepackage[framemethod=TikZ]{mdframed}
+
+\input{macros.tex}
+
+\title{Machine Learning with Artelys Knitro}
+\date{May 29th, 2020}
+
+
+\begin{document}
+
+\begin{frame}{Une modélisation en plusieurs étapes}
+  Travail adapté de Cosma Shalizi
+\end{frame}
+
+\section{Le modèle SIR}
+
+\begin{frame}{Un premier modèle probabiliste}
+  \begin{itemize}
+    \item En cas d'épidémie, chaque personne peut être dans un des trois états
+      \begin{itemize}
+        \item \emph{Sain (S)}: non malade, mais peut être contaminé
+        \item \emph{Infectieux (I)}: malade, et peut contiminer d'autres personnes
+        \item \emph{Removed (R)}: guéri
+      \end{itemize}
+  \end{itemize}
+
+  \begin{block}{Hypothèses}
+    \begin{itemize}
+      \item Contagion : un $S$ peut être contaminé quand il rencontre un $I$,
+      \item Removal: au bout d'un certain temps, les $I$ se transforment spontanément en $R$
+      \item Mixing: la \emph{probabilité} qu'un $S$ rencontre un $I$ dépend du nombre total
+        de $S$, $I$ et $R$
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Un premier modèle probabiliste}
+  Proposons un premier modèle discret, suivant les hypothèses précédentes
+  \begin{itemize}
+    \item La population totale est $n$
+    \item
+
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Et nous obtenons les équations probabilistes ...}
+  Le modèle s'écrit dès-lors :
+  \begin{equation}
+    \left\{
+      \begin{aligned}
+        C_{k} &~ \text{binom}(S_k, \frac{\beta}{n}\Delta I) \\
+        D_{k} &~ \text{binom}(I_k, \gamma \Delta) \\
+        S_{k+1} &= S_k - C_k \\
+        I_{k+1} &= I_k + C_k - D_k \\
+        R_{k+1} &= R_k + D_k
+      \end{aligned}
+    \right.
+  \end{equation}
+\end{frame}
+
+\begin{frame}{Simulation (1)}
+
+\end{frame}
+
+\begin{frame}{Simulation (2)}
+
+\end{frame}
+
+\begin{frame}{Simulation (3)}
+
+\end{frame}
+
+\begin{frame}{Et si nous passions à la limite ?}
+  Que se passe-t-il si la population devient très grande ($n \to \infty$) et
+  le pas de temps très petit ($\Delta \to 0$) ?
+  \begin{itemize}
+    \item On a:
+    \[
+      \dfrac{S_{k+1} - S_k}{\Delta} =
+      \quad
+      \dfrac{I_{k+1} - I_k}{\Delta} =
+
+    \]
+  \item En passant à l'espérance:
+
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Le modèle SIR}
+  Le modèle SIR correspond aux équations différentielles suivantes :
+  \begin{equation}
+    \left\{
+      \begin{aligned}
+        & \dot{S} = - \frac{\beta}{n} S I \\
+        & \dot{I} = \frac{\beta}{n} I S - \gamma I \\
+        & \dot{R} = \gamma I
+      \end{aligned}
+    \right.
+  \end{equation}
+  Ces équations sont déterministes !
+\end{frame}
+
+\begin{frame}{Qu'est-ce que $R_0$?}
+  En normalisant les équations du modèle SIR, nous observons que le seul
+  paramètre restant est le ratio $\frac{\beta}{\gamma}$.
+
+  \begin{block}{Nombre de reproduction basique $R_0$}
+   On définit $R_0$ comme le nombre moyen de nouvelles infections si on
+   ajoute un agent infectieux dans une population non atteinte
+  \end{block}
+
+  Nous avons trois régimes :
+  \begin{itemize}
+    \item $R_0 < 1$: Sous-critique
+    \item $R_0 > 1$: Super-critique
+    \item $R_0 = 1$: Critique
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Identification de $R_0$}
+  Dans le modèle SIR, on identifie :
+  \begin{equation}
+    R_0 = \frac{\beta}{\gamma}
+  \end{equation}
+  On suppose qu'initialement: $S(0) \approx n$ Alors
+  \begin{equation}
+    \begin{aligned}
+      \dot{I} &= \frac{\beta}{n} S I - \gamma I  \\
+              &= (\beta \frac{S}{n} - \gamma) I \\
+              &\approx (\beta  - \gamma) I \\
+    \end{aligned}
+  \end{equation}
+  d'où, au début de l'épidémie : $I(t) \approx I_0 e^{(\beta - gamma)t}$
+
+\end{frame}
+
+\begin{frame}{Les limites du modèle SIR}
+  Le modèle SIR comporte seulement trois états ! Des variantes existent :
+  \begin{itemize}
+    \item Etat exposé $E$ des gens ont été exposés à la maladie mais ne sont pas
+      encore dans l'état $I$
+    \item Etat asymptomatique
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Un modèle régionalisé}
+  Une extension usuelle du modèle SIR est de prendre en compte les échanges
+  entre plusieurs régions $i = 1, \cdots, N$
+  \begin{equation}
+    \dot{I_i} = \frac{\beta}{n} S_i I_i - \gamma I_i - \mu_{ij} I_i +
+    \mu_{ji} I_j
+  \end{equation}
+  où $\mu_{ij}$ est la proportion de personnes voyageant de la région $i$ à $j$
+\end{frame}
+
+\section{Un modèle plus détaillé}
+
+\begin{frame}{Un modèle détaillé : }
+  Nous avons vu précédemment le modèle SIR \\
+  Analysons maintenant comment pouvons nous adopter ce modèle sur un graphe
+
+\end{frame}
+
+\end{document}
