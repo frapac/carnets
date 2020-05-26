@@ -1,151 +1,283 @@
+%! TeX program = lualatex
 \documentclass[10pt]{beamer}
 
-\usecolortheme{seahorse}
-
-% pour utiliser une police à empattements partout
-\usefonttheme{serif}
-
-% pour rajouter la numérotation des frames dans les pieds de page
-\newcommand*\oldmacro{}%
-\let\oldmacro\insertshorttitle%
-\renewcommand*\insertshorttitle{%
-  \oldmacro\hfill%
-  \insertframenumber\,/\,\inserttotalframenumber}
-
-}
+% \usecolortheme{seahorse}
+\usetheme[numbering=fraction, block=fill, subsectionpage=progressbar]{metropolis}
 
 \usepackage{graphicx} % allows including images
 \usepackage{booktabs} % allows the use of \toprule, \midrule and \bottomrule in tables
-
-\atbeginsection[]
-{
-\begin{frame}{plan}
-\tableofcontents[currentsection]
-\end{frame}
-}
-\input{preambule/special_beamer.tex}
-
 \usepackage{natbib}         % Pour la bibliographie
 \usepackage{url}            % Pour citer les adresses web
 \usepackage[utf8]{inputenc} % Lui aussi
-\usepackage[frenchb]{babel} % Pour la traduction française
+\usepackage[french]{babel} % Pour la traduction française
 \usepackage{numprint}       % Histoire que les chiffres soient bien
-
 \usepackage{amsmath}        % La base pour les maths
 \usepackage{mathrsfs}       % Quelques symboles supplémentaires
 \usepackage{amssymb}        % encore des symboles.
 \usepackage{amsfonts}       % Des fontes, eg pour \mathbb.
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{fontspec}
 
 \usepackage{pifont}
 \usepackage{cancel}
 \usepackage{hhline}
-
-
 \usepackage{graphicx} % inclusion des graphiques
 
 \usepackage{tikz}
 \usepackage[framemethod=TikZ]{mdframed}
 
+% \setbeamertemplate{footline}[page number]{}
+\definecolor{myblue}{HTML}{332288}
+\definecolor{bluegreen}{RGB}{3, 166, 155}
+\definecolor{pitchblack}{RGB}{0, 0, 0}
+\definecolor{lightbeige}{RGB}{255, 251, 241}
+\definecolor{mediumgray}{RGB}{230, 230, 230}
+\definecolor{darkred}{RGB}{100, 0, 0}
+
+\hypersetup{
+    colorlinks,
+    citecolor=green,
+    % linkcolor=darkred
+}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{math text}{fg=black!15!myblue}
+\setbeamercolor{frametitle}{bg=mediumgray, fg=darkred}
+\setbeamercolor{alerted text}{fg=darkred}
+\setbeamercovered{%
+  again covered={\opaqueness<1->{15}}}
+\setbeamertemplate{frametitle}[default][right]
+
 \input{macros.tex}
 
-\title{Machine Learning with Artelys Knitro}
-\date{May 29th, 2020}
 
+\title{Décision dans l'incertain}
+\subtitle{Modélisation d'une épidémie}
+\date{Vendredi 29 Mai 2020}
 
 \begin{document}
 
-\begin{frame}{Une modélisation en plusieurs étapes}
-  Travail adapté de Cosma Shalizi
+\begin{frame}
+  \maketitle
 \end{frame}
 
-\section{Le modèle SIR}
-
-\begin{frame}{Un premier modèle probabiliste}
-  \begin{itemize}
-    \item En cas d'épidémie, chaque personne peut être dans un des trois états
-      \begin{itemize}
-        \item \emph{Sain (S)}: non malade, mais peut être contaminé
-        \item \emph{Infectieux (I)}: malade, et peut contiminer d'autres personnes
-        \item \emph{Removed (R)}: guéri
-      \end{itemize}
-  \end{itemize}
-
-  \begin{block}{Hypothèses}
+\begin{frame}{Comment modéliser une épidémie ?}
+  \begin{columns}
+    \column{.5\textwidth}
+    \includegraphics[width=.9\textwidth]{cubic_model}
+    \includegraphics[width=.9\textwidth]{article}
+    \column{.5\textwidth}
     \begin{itemize}
-      \item Contagion : un $S$ peut être contaminé quand il rencontre un $I$,
-      \item Removal: au bout d'un certain temps, les $I$ se transforment spontanément en $R$
-      \item Mixing: la \emph{probabilité} qu'un $S$ rencontre un $I$ dépend du nombre total
+      \item Beaucoup de modèles sont proposés ...
+      \item ... avec des enjeux énormes
+    \end{itemize}
+    \emph{Comment juger de la pertinence d'un modèle ?}
+
+    \vspace{.5cm}
+
+    \pause
+    \alert{Nous verrons ici comment utiliser \\
+    un modèle \emph{probabiliste} pour modéliser
+    une épidémie}
+
+    \vspace{.5cm}
+
+    \emph{Le travail présenté ci-après est adapté très largement
+      adapté de Cosma Shalizi dans sa présentation \emph{Epidemic Models}
+      (16 avril 2020)
+    }
+  \end{columns}
+\end{frame}
+
+\section{D'une modélisation probabiliste au modèle SIR}
+
+\begin{frame}{Le modèle SIR part des présupposés suivants}
+  Supposons que nous ayons une maladie avec 3 états possibles
+    \begin{itemize}
+      \item \emph{S (Susceptible)}: sain, mais peut être contaminé
+      \item \emph{I (Infectious)}: malade, et peut contaminer d'autres personnes
+      \item \emph{R (Removed)}: guéri, et ne peut plus être contaminé
+    \end{itemize}
+
+  \vspace{.5cm}
+  \begin{block}{Jeu d'hypothèses}
+    \begin{itemize}
+      \item \textbf{Contagion :} un $S$ peut être contaminé quand il rencontre un $I$
+      \item \textbf{Guérison} au bout d'un certain temps, les $I$ se transforment spontanément en $R$
+      \item \textbf{Mixité:} la \emph{probabilité} qu'un $S$ rencontre un $I$ dépend du nombre total
         de $S$, $I$ et $R$
     \end{itemize}
   \end{block}
 \end{frame}
 
 \begin{frame}{Un premier modèle probabiliste}
-  Proposons un premier modèle discret, suivant les hypothèses précédentes
+  Proposons un premier modèle \emph{discret}, suivant les hypothèses précédentes
   \begin{itemize}
-    \item La population totale est $n$
-    \item
-
+    \item Nous avons une population totale de $n$
+    \item Le pas de temps de discrétisation $\delta$ est petit \\
+    \item On note $(S_k, I_k, R_k)$ l'état de l'épidémie au pas de temps $t_k = t_0 + k\delta$
+      \begin{itemize}
+        \item Pendant un temps $\delta$, chaque personne $S$ rencontre $p\delta$ personnes,\\
+          avec une probabilité de contagion de $c$
+        \item Nous avons une probabilité $\frac{I_k}{n}$ que chaque personne rencontrée \\ soit infectée
+        \item la probabilité qu'une personne $S$ soit contaminée durant l'intervalle de temps est dès-lors
+          \[
+            \begin{aligned}
+              \PP(S \to I) &= 1 - \PP(S \to S)  \\
+                           &= 1 - \underbrace{(1 - c \frac{I_k}{n})^{p \delta}}_{\mathclap{\text{(aucune rencontre ne mène à une contamination)}}} \\
+              \PP(S \to I)&\approx p \delta \times c \times \frac{I_k}{n}
+            \end{aligned}
+          \]
+      \end{itemize}
   \end{itemize}
-
 \end{frame}
 
-\begin{frame}{Et nous obtenons les équations probabilistes ...}
-  Le modèle s'écrit dès-lors :
-  \begin{equation}
+\begin{frame}{Contagions, guérisons}
+  De ce qui précède, nous déduisons
+  \begin{block}{Propriété}
+    \begin{itemize}
+      \item Le nombre de contagion $C_k$ ($S \to I$) suit une \emph{loi binomiale}
+        \[
+          C_k \sim \text{binom}(S_k, pc\delta \frac{I_k}{n})
+        \]
+        \vspace{-.5cm}
+      \item De même, on en déduit que le nombre de rémission $D_k$ ($I \to R$) \\
+        suit une loi binomiale
+        \[
+          D_k \sim \text{binom}(I_k, \gamma \delta)
+        \]
+        avec $\gamma$ taux de guérison
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Nous obtenons les équations probabilistes suivantes ...}
+  \[
     \left\{
       \begin{aligned}
-        C_{k} &~ \text{binom}(S_k, \frac{\beta}{n}\Delta I) \\
-        D_{k} &~ \text{binom}(I_k, \gamma \Delta) \\
+        % C_{k} &\sim \text{binom}(S_k, \frac{\beta}{n}\delta I) \\
+        % D_{k} &\sim \text{binom}(I_k, \gamma \delta) \\
         S_{k+1} &= S_k - C_k \\
         I_{k+1} &= I_k + C_k - D_k \\
         R_{k+1} &= R_k + D_k
       \end{aligned}
     \right.
-  \end{equation}
+  \]
+
+  \vspace{1cm}
+
+  avec
+  \begin{itemize}
+    \item $C_k\sim \text{binom}(S_k, \frac{\beta}{n}\delta I_k)$: nombre de contagions au pas de temps $k$
+    \item $D_k\sim \text{binom}(I_k, \gamma \delta)$: nombre de rémissions au pas de temps $k$
+    \item $\beta = p c$ taux de contagion
+  \end{itemize}
+
+  \vspace{.5cm}
+  \pause
+  Notons que le passage entre les trois états se fait uniquement \\
+  dans le sens $S \to I \to R$!
 \end{frame}
 
 \begin{frame}{Simulation (1)}
-
+  Si nous faisons tourner une simulation
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_1}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{Simulation (2)}
-
+  N'oublions pas que nous sommes dans une configuration aléatoire ! \\
+  En faisant tourner 100 simulations, nous avons
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_2}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{Simulation (3)}
+  Si la contagion devient plus difficile
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_3}
+  \end{figure}
+\end{frame}
 
+\begin{frame}{Simulation (4)}
+  Niveau de contagion intermédiaire
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_4}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Simulation (5)}
+  Probabilité de guérison plus élevée
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_5}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{Et si nous passions à la limite ?}
-  Que se passe-t-il si la population devient très grande ($n \to \infty$) et
-  le pas de temps très petit ($\Delta \to 0$) ?
+  Que se passe-t-il si la population devient très grande ($n \to \infty$) \\
+  et le pas de temps très petit ($\delta \to 0$) ?
   \begin{itemize}
     \item On a:
     \[
-      \dfrac{S_{k+1} - S_k}{\Delta} =
-      \quad
-      \dfrac{I_{k+1} - I_k}{\Delta} =
-
+      \begin{aligned}
+        \dfrac{S_{k+1} - S_k}{\delta} &\sim - \frac{1}{\delta} \text{binom}(S_k, \beta \delta I_k / n)
+      \\
+        \dfrac{I_{k+1} - I_k}{\delta} &\sim \frac{1}{\delta} \text{binom}(S_k, \beta \delta I_k / n) -
+        \frac{1}{\delta} \text{binom}(I_k, \gamma \delta)
+      \end{aligned}
     \]
-  \item En passant à l'espérance:
+  \item En passant à l'espérance (si $X \sim \text{binom}(n, p)$, $\EE(X) = n p$)
+    \[
+      \begin{aligned}
+        \EE\bc{\dfrac{S_{k+1} - S_k}{\delta}} &= -\frac{\beta}{n} S_k I_k
+      \\
+        \EE\bc{\dfrac{I_{k+1} - I_k}{\delta}} &= \frac{\beta}{n} S_k I_k - \gamma I_k
+      \end{aligned}
+    \]
+  \end{itemize}
+\end{frame}
 
+\begin{frame}{Qu'en est-il des fluctuations autour de la moyenne ?}
+  \begin{itemize}
+    \item Si on regarde la variance (si $X \sim \text{binom}(n, p)$, $\VV(X) = n p (1- p)$)
+    \[
+        \VV\bc{\dfrac{S_{k+1} - S_k}{\delta}} = \frac{\beta}{\delta n} S_k I_k (1 - \frac{\beta}{n} \delta I_k)
+    \]
+    et on obtient $\VV\bc{\dfrac{S_{k+1} - S_k}{\delta}} \to 0$ quand $n \to \infty$
+  \item Le même raisonnement tient pour $\VV\bc{\dfrac{I_{k+1} - I_k}{\delta}}$
+  \item On peut donc négliger les variations autour de la moyenne quand $n \to \infty$!
   \end{itemize}
 
+  \emph{Ce passage n'est pas trop rigoureux...}
 \end{frame}
 
 \begin{frame}{Le modèle SIR}
-  Le modèle SIR correspond aux équations différentielles suivantes :
-  \begin{equation}
-    \left\{
-      \begin{aligned}
-        & \dot{S} = - \frac{\beta}{n} S I \\
-        & \dot{I} = \frac{\beta}{n} I S - \gamma I \\
-        & \dot{R} = \gamma I
-      \end{aligned}
-    \right.
-  \end{equation}
-  Ces équations sont déterministes !
+  Lorsque $n\to \infty$ et $\delta \to 0$
+  on obtient le modèle SIR continu :
+
+  \begin{block}{Modèle SIR}
+    Le modèle SIR correspond aux équations différentielles suivantes :
+    \[
+      \left\{
+        \begin{aligned}
+          & \dot{S} = - \frac{\beta}{n} S I \\
+          & \dot{I} = \frac{\beta}{n} I S - \gamma I \\
+          & \dot{R} = \gamma I
+        \end{aligned}
+      \right.
+    \]
+  \end{block}
+  Ces équations sont déterministes et non-linéaires !
+\end{frame}
+
+\begin{frame}{Simulation avec les paramètres originaux}
+  On résout le système d'équation différentielle numériquement
+  \begin{figure}
+    \includegraphics[width=.9\textwidth]{simu_6}
+  \end{figure}
 \end{frame}
 
 \begin{frame}{Qu'est-ce que $R_0$?}
@@ -167,46 +299,206 @@
 
 \begin{frame}{Identification de $R_0$}
   Dans le modèle SIR, on identifie :
-  \begin{equation}
+  \[
     R_0 = \frac{\beta}{\gamma}
-  \end{equation}
-  On suppose qu'initialement: $S(0) \approx n$ Alors
-  \begin{equation}
+  \]
+  On suppose qu'initialement: $S(0) \approx n$. Alors
+  \[
     \begin{aligned}
       \dot{I} &= \frac{\beta}{n} S I - \gamma I  \\
               &= (\beta \frac{S}{n} - \gamma) I \\
               &\approx (\beta  - \gamma) I \\
     \end{aligned}
-  \end{equation}
-  d'où, au début de l'épidémie : $I(t) \approx I_0 e^{(\beta - gamma)t}$
-
+  \]
+  d'où une croissance exponentielle de malades au début de l'épidémie
+  \[
+  I(t) \approx I_0 e^{(\beta - \gamma)t}
+  \]
 \end{frame}
 
 \begin{frame}{Les limites du modèle SIR}
   Le modèle SIR comporte seulement trois états ! Des variantes existent :
   \begin{itemize}
-    \item Etat exposé $E$ des gens ont été exposés à la maladie mais ne sont pas
-      encore dans l'état $I$
-    \item Etat asymptomatique
+    \item Etat d'incubation $E$ des gens qui ont été exposés à la maladie mais ne sont pas
+      encore dans l'état $I$ (modèle SEIR)
+    \item Etat asymptomatique $A$ des gens ne présentant pas de symptôme
+      mais contaminant
+    \item Possibilité éventuelle de retomber malade (passage $R \to I$)
   \end{itemize}
+
+  Le modèle dépend donc intrinséquement des caractéristiques du virus ...
 \end{frame}
 
 \begin{frame}{Un modèle régionalisé}
   Une extension usuelle du modèle SIR est de prendre en compte les échanges
   entre plusieurs régions $i = 1, \cdots, N$
-  \begin{equation}
+  \[
     \dot{I_i} = \frac{\beta}{n} S_i I_i - \gamma I_i - \mu_{ij} I_i +
     \mu_{ji} I_j
-  \end{equation}
+  \]
   où $\mu_{ij}$ est la proportion de personnes voyageant de la région $i$ à $j$
+
+  \vspace{1cm}
+
+  \pause
+  \emph{
+  Pendant l'épidémie, $\mu_{ij}$ a très souvent été estimé avec les données
+  téléphoniques
+  }
 \end{frame}
 
 \section{Un modèle plus détaillé}
 
-\begin{frame}{Un modèle détaillé : }
-  Nous avons vu précédemment le modèle SIR \\
-  Analysons maintenant comment pouvons nous adopter ce modèle sur un graphe
+\begin{frame}{}
+  \begin{columns}
+    \column{.5\textwidth}
+    \includegraphics[width=\textwidth]{social_network}
+    {\tiny
+      Source: Wikipedia
+    }
+    \column{.5\textwidth}
+    Nous avons vu précédemment le modèle SIR,\\
+    qui reposait sur un certain nombre d'hypothèses\\[1cm]
 
+    Analysons maintenant comment pouvons-nous adapter ce modèle sur un graphe
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Structure en réseau}
+
+  \begin{itemize}
+    \item Certaines personnes sont plus sociables que d'autres ...
+    \item Intéressons nous maintenant au \emph{graphe des relations} \\
+      (si $i$ (Igor) connaît $j$ (Jeanne), alors $a_{ij} = 1$, sinon $0$)
+  \end{itemize}
+
+  \begin{block}{Définitions (rappel)}
+    \begin{itemize}
+      \item Le \emph{degré} d'un noeud $i$ est égal à
+        \[
+          \text{deg}(i) = \sum_{j=1}^n a_{ij}
+        \]
+        \vspace{-.4cm}
+      \item Pour tout $k \in \NN$, on note $p(k)$ la fraction des noeuds ayant\\
+        un degré égal à $k$
+    \end{itemize}
+  \end{block}
+
+  Comment la topologie du réseau influe-t-elle sur la diffusion de l'épidémie ?
+\end{frame}
+
+\begin{frame}{Passons au modèle mathématique}
+  \begin{itemize}
+    \item Notons $\tau$ le taux de transmission de la maladie
+    \item Supposons que $i$ soit infecté par un noeud adjacent
+    \item $R_0$ est le nombre moyen de nouvelles infections causées par $i$,
+      soit
+      \[
+        R_0 = \tau \EE\bc{\text{deg}(i) - 1}
+      \]
+      (on enlève le noeud adjacent qui a transmis la maladie à Igor)
+  \end{itemize}
+
+  Calculons maintenant $\EE\bc{\text{deg}(i) - 1}$ pour avoir $R_0$
+\end{frame}
+
+\begin{frame}{Le paradoxe de l'amitié}
+  Attention !
+  \[
+    \EE\bc{\text{deg}(Igor)} \neq \EE\bc{\text{degree of random node}} = \sum_{k=0}^\infty k p(k)
+  \]
+
+  \begin{block}{Le paradoxe de l'amitié}
+    Mes amis ont en moyenne plus d'amis que moi
+  \end{block}
+  \textbf{Preuve. }\\
+  Igor \emph{n'est pas} un noeud aléatoire, mais un noeud atteint par une \emph{arête aléatoire} \\
+
+  En moyenne, les noeuds avec une connectivité élevée ont une probabilité plus grande
+  d'être atteint par une arête prise de manière aléatoire \\
+
+  \[
+    \PP\bp{\text{deg}(Igor) = k} = \dfrac{k p(k)}{\sum_{k=1}^\infty k p(k)}
+  \]
+  puis nous prouvons le paradoxe en prenant l'espèrance de cette loi
+\end{frame}
+
+\begin{frame}{Retournons à notre $R_0$}
+  On a alors
+  \[
+    \begin{aligned}
+      R_0 &= \tau \EE\bc{\text{deg}(i) - 1} \\
+          &= \tau \dfrac{\sum_{k=1}^\infty (k-1) k p(k)}{\sum_{k=1}^\infty k p(k)} \\
+          &= \tau \dfrac{\EE\bc{K^2 - K}}{\EE\bc{K}}
+    \end{aligned}
+  \]
+  \vspace{.7cm}
+  D'où
+  \begin{block}{}
+  \[
+    R_0 = \tau \Bp{\dfrac{\VV\nc{K} + \EE\nc{K}^2 - \EE\nc{K}}{\EE\nc{K}}}
+  \]
+  \end{block}
+\end{frame}
+
+\begin{frame}{Comment éviter l'épidémie ? }
+  On souhaite avoir $R_0 < 1$, soit
+  \[
+    \tau \Bp{\dfrac{\VV\bc{K}}{\EE\bc{K}} + \EE\bc{K} - 1} < 1
+  \]
+  Pour cela, on peut :
+  \begin{itemize}
+    \item Diminuer la transmission $\tau$ \emph{(sortir masqué)}
+    \item Diminuer le degré moyen $\EE\nc{K}$ \emph{(rester chez soi)}
+    \item Diminuer la variance $\VV\nc{K}$ \emph{(enlever les noeuds très connectés)}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Comment simuler l'épidémie sur un réseau ?}
+  \begin{itemize}
+    \item En pratique, il est très difficile d'avoir accès à des graphes
+      réalistes (hormi pour Facebook et quelques opérateurs téléphoniques)
+    \item On se contente souvent de \emph{graphes aléatoires} pour les simulations !
+      Par exemple, en utilisant des graphes d'Erdös-Rényi
+  \end{itemize}
+
+  \begin{block}{Graphe d'Erdös-Rényi}
+    Soit $n\geq 1$ un entier, $p \in [0, 1]$ un paramètre\\
+    Les arêtes graphe aléatoire d'Erdös-Rényi $G = G(n, p)$ sont générées
+    de manière aléatoire et indépendante
+    \[
+      a_{ij} = 1 \quad \iff \quad X_{ij} = 1
+    \]
+    où $X_{ij}$ est une variable aléatoire suivant une loi de Bernouilli de paramètre $p$
+  \end{block}
+\end{frame}
+
+\begin{frame}{Vers les modèles agents}
+
+  {\footnotesize
+    \begin{columns}
+      \column{.3\textwidth}
+      \includegraphics[width=.9\textwidth]{conway}
+      \column{.7\textwidth}
+      \begin{itemize}
+        \item Un modèle agent est une simulation avec $n$ agents où
+          chacun des agents suit et interagit avec les autres agents suivant
+          un comportement programmé
+        \item Des comportements systèmiques peuvent parfois émerger des interactions
+          individuelles
+        \item Le \emph{game of life} de Conway est un des modèles agents les plus connus,
+          aboutissants suivant l'initialisation à des comportements complexes des
+          automates cellulaires
+      \end{itemize}
+
+    \end{columns}
+
+    \vspace{1cm}
+    Pour aller plus loin, voir la vidéo très intéressante de Guy Théraulaz : \emph{L'intelligence collective des sociétés animales}
+    \footnote{
+      \url{https://www.college-de-france.fr/site/colloque-2018/symposium-2018-10-19-11h50.htm}
+    }
+  }
 \end{frame}
 
 \end{document}
