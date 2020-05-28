@@ -53,7 +53,7 @@
 
 
 \title{Décision dans l'incertain}
-\subtitle{Modélisation d'une épidémie}
+\subtitle{Comment modéliser une épidémie ?}
 \date{Vendredi 29 Mai 2020}
 
 \begin{document}
@@ -72,7 +72,7 @@
       \item Beaucoup de modèles sont proposés ...
       \item ... avec des enjeux énormes
     \end{itemize}
-    \emph{Comment juger de la pertinence d'un modèle ?}
+    \emph{Comment juger la pertinence d'un modèle ?}
 
     \vspace{.5cm}
 
@@ -84,7 +84,7 @@
     \vspace{.5cm}
 
     \emph{Le travail présenté ci-après est adapté très largement
-      adapté de Cosma Shalizi dans sa présentation \emph{Epidemic Models}
+      de celui de Cosma Shalizi dans sa présentation \emph{Epidemic Models}
       (16 avril 2020)
     }
   \end{columns}
@@ -113,10 +113,12 @@
 
 \begin{frame}{Un premier modèle probabiliste}
   Proposons un premier modèle \emph{discret}, suivant les hypothèses précédentes
+
+  {\small
   \begin{itemize}
     \item Nous avons une population totale de $n$
     \item Le pas de temps de discrétisation $\delta$ est petit \\
-    \item On note $(S_k, I_k, R_k)$ l'état de l'épidémie au pas de temps $t_k = t_0 + k\delta$
+    \item On note $(S_k, I_k, R_k)$ l'état de l'épidémie au pas de temps~$t_k = t_0 + k\delta$
       \begin{itemize}
         \item Pendant un temps $\delta$, chaque personne $S$ rencontre $p\delta$ personnes,\\
           avec une probabilité de contagion de $c$
@@ -126,28 +128,31 @@
             \begin{aligned}
               \PP(S \to I) &= 1 - \PP(S \to S)  \\
                            &= 1 - \underbrace{(1 - c \frac{I_k}{n})^{p \delta}}_{\mathclap{\text{(aucune rencontre ne mène à une contamination)}}} \\
-              \PP(S \to I)&\approx p \delta \times c \times \frac{I_k}{n}
+              \PP(S \to I)&\approx p \delta \times c \times \frac{I_k}{n} \qquad \text{si $n$ grand}
             \end{aligned}
           \]
       \end{itemize}
   \end{itemize}
+  }
+
 \end{frame}
 
 \begin{frame}{Contagions, guérisons}
-  De ce qui précède, nous déduisons
-  \begin{block}{Propriété}
+  De ce qui précède, nous déduisons que si $n \gg 1$
+  \vspace{.5cm}
+  \begin{block}{Les contagions et guérisons sont probabilistes}
     \begin{itemize}
       \item Le nombre de contagion $C_k$ ($S \to I$) suit une \emph{loi binomiale}
         \[
           C_k \sim \text{binom}(S_k, pc\delta \frac{I_k}{n})
         \]
         \vspace{-.5cm}
-      \item De même, on en déduit que le nombre de rémission $D_k$ ($I \to R$) \\
-        suit une loi binomiale
+      \item Le nombre de rémission $D_k$ ($I \to R$)
+        suit aussi une loi binomiale
         \[
           D_k \sim \text{binom}(I_k, \gamma \delta)
         \]
-        avec $\gamma$ taux de guérison
+        avec $\gamma$ taux de guérison (indépendant de $n$)
     \end{itemize}
   \end{block}
 \end{frame}
@@ -165,8 +170,6 @@
     \right.
   \]
 
-  \vspace{1cm}
-
   avec
   \begin{itemize}
     \item $C_k\sim \text{binom}(S_k, \frac{\beta}{n}\delta I_k)$: nombre de contagions au pas de temps $k$
@@ -174,21 +177,26 @@
     \item $\beta = p c$ taux de contagion
   \end{itemize}
 
-  \vspace{.5cm}
+  \vspace{.3cm}
+  \pause
+  \begin{center}
+    \emph{Nous obtenons un modèle Markovien!\\ Le système suit une dynamique aléatoire}
+  \end{center}
+  \vspace{.3cm}
   \pause
   Notons que le passage entre les trois états se fait uniquement \\
   dans le sens $S \to I \to R$!
 \end{frame}
 
 \begin{frame}{Simulation (1)}
-  Si nous faisons tourner une simulation
+  Si nous faisons tourner une simulation, nous avons ...
   \begin{figure}
     \includegraphics[width=.9\textwidth]{simu_1}
   \end{figure}
 \end{frame}
 
 \begin{frame}{Simulation (2)}
-  N'oublions pas que nous sommes dans une configuration aléatoire ! \\
+  Mais n'oublions pas que nous avons une dynamique aléatoire ! \\
   En faisant tourner 100 simulations, nous avons
   \begin{figure}
     \includegraphics[width=.9\textwidth]{simu_2}
@@ -217,8 +225,7 @@
 \end{frame}
 
 \begin{frame}{Et si nous passions à la limite ?}
-  Que se passe-t-il si la population devient très grande ($n \to \infty$) \\
-  et le pas de temps très petit ($\delta \to 0$) ?
+  Que se passe-t-il si le pas de temps très petit ($\delta \to 0$) ?
   \begin{itemize}
     \item On a:
     \[
@@ -229,12 +236,12 @@
         \frac{1}{\delta} \text{binom}(I_k, \gamma \delta)
       \end{aligned}
     \]
-  \item En passant à l'espérance (si $X \sim \text{binom}(n, p)$, $\EE(X) = n p$)
+  \item En passant à l'espérance conditionnelle \\ (si $X \sim \text{binom}(n, p)$, $\EE(X) = n p$)
     \[
       \begin{aligned}
-        \EE\bc{\dfrac{S_{k+1} - S_k}{\delta}} &= -\frac{\beta}{n} S_k I_k
+        \EE\Bc{\dfrac{S_{k+1} - S_k}{\delta} \; \bigr\vert \; S_k=s_k, I_k=i_k} &= -\frac{\beta}{n} s_k i_k
       \\
-        \EE\bc{\dfrac{I_{k+1} - I_k}{\delta}} &= \frac{\beta}{n} S_k I_k - \gamma I_k
+        \EE\Bc{\dfrac{I_{k+1} - I_k}{\delta}\; \bigr\vert \; S_k=s_k, I_k=i_k} &= \frac{\beta}{n} s_k i_k - \gamma i_k
       \end{aligned}
     \]
   \end{itemize}
@@ -244,14 +251,18 @@
   \begin{itemize}
     \item Si on regarde la variance (si $X \sim \text{binom}(n, p)$, $\VV(X) = n p (1- p)$)
     \[
-        \VV\bc{\dfrac{S_{k+1} - S_k}{\delta}} = \frac{\beta}{\delta n} S_k I_k (1 - \frac{\beta}{n} \delta I_k)
+        \VV\Bc{\dfrac{S_{k+1} - S_k}{\delta}\; \bigr\vert \; S_k=s_k, I_k=i_k} = \frac{\beta}{\delta n} s_k i_k (1 - \frac{\beta}{n} \delta i_k)
     \]
-    et on obtient $\VV\bc{\dfrac{S_{k+1} - S_k}{\delta}} \to 0$ quand $n \to \infty$
+    \vspace{-.5cm}
+  \item Sous un jeu d'hypothèses précis (par ex. $n \delta \to \infty$)
+    nous pouvons obtenir $\VV\bc{\dfrac{S_{k+1} - S_k}{\delta}\; \bigr\vert \; S_k=s_k, I_k=i_k} \to 0$
   \item Le même raisonnement tient pour $\VV\bc{\dfrac{I_{k+1} - I_k}{\delta}}$
-  \item On peut donc négliger les variations autour de la moyenne quand $n \to \infty$!
+  \item Dans ce cas, nous pouvons négliger les variations autour de l'espérance dans notre modèle
   \end{itemize}
 
-  \emph{Ce passage n'est pas trop rigoureux...}
+  \pause
+  \emph{Ce passage n'est pas trop rigoureux mais nécessite des notions \\
+    qui seront vues durant le cours de processus stochastique de 2e année}
 \end{frame}
 
 \begin{frame}{Le modèle SIR}
@@ -280,28 +291,28 @@
   \end{figure}
 \end{frame}
 
-\begin{frame}{Qu'est-ce que $R_0$?}
-  En normalisant les équations du modèle SIR, nous observons que le seul
-  paramètre restant est le ratio $\frac{\beta}{\gamma}$.
+\begin{frame}{Qu'est-ce que le nombre de reproduction basique $R_0$?}
 
   \begin{block}{Nombre de reproduction basique $R_0$}
    On définit $R_0$ comme le nombre moyen de nouvelles infections si on
    ajoute un agent infectieux dans une population non atteinte
   \end{block}
 
-  Nous avons trois régimes :
-  \begin{itemize}
-    \item $R_0 < 1$: Sous-critique
-    \item $R_0 > 1$: Super-critique
-    \item $R_0 = 1$: Critique
-  \end{itemize}
+  \vspace{1cm}
+  \begin{columns}
+    \column{.3\textwidth}
+      \includegraphics[width=.9\textwidth]{merkel}
+    \column{.6\textwidth}
+    Nous avons trois régimes :
+    \begin{itemize}
+      \item $R_0 < 1$: Sous-critique
+      \item $R_0 > 1$: Super-critique
+      \item $R_0 = 1$: Critique
+    \end{itemize}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Identification de $R_0$}
-  Dans le modèle SIR, on identifie :
-  \[
-    R_0 = \frac{\beta}{\gamma}
-  \]
   On suppose qu'initialement: $S(0) \approx n$. Alors
   \[
     \begin{aligned}
@@ -313,6 +324,11 @@
   d'où une croissance exponentielle de malades au début de l'épidémie
   \[
   I(t) \approx I_0 e^{(\beta - \gamma)t}
+  \]
+  La croissance devient \emph{exponentielle} si $\beta > \gamma$ \\
+  On en déduit
+  \[
+    R_0 = \frac{\beta}{\gamma}
   \]
 \end{frame}
 
@@ -327,6 +343,11 @@
   \end{itemize}
 
   Le modèle dépend donc intrinséquement des caractéristiques du virus ...
+
+  \vspace{.5cm}
+  \begin{block}{On n'est jamais trop prudent}
+    Un modèle est un \emph{outil}, et ne doit jamais être pris au pied de la lettre!
+  \end{block}
 \end{frame}
 
 \begin{frame}{Un modèle régionalisé}
@@ -357,7 +378,7 @@
       Source: Wikipedia
     }
     \column{.5\textwidth}
-    Nous avons vu précédemment le modèle SIR,\\
+    Nous avons vu précédemment le modèle SIR,
     qui reposait sur un certain nombre d'hypothèses\\[1cm]
 
     Analysons maintenant comment pouvons-nous adapter ce modèle sur un graphe
@@ -379,60 +400,103 @@
           \text{deg}(i) = \sum_{j=1}^n a_{ij}
         \]
         \vspace{-.4cm}
-      \item Pour tout $k \in \NN$, on note $p(k)$ la fraction des noeuds ayant\\
-        un degré égal à $k$
+      \item Pour tout $k \in \NN$, on note $p(k)$ la proportion des noeuds \\
+        ayant un degré égal à $k$
     \end{itemize}
   \end{block}
 
-  Comment la topologie du réseau influe-t-elle sur la diffusion de l'épidémie ?
+  \emph{Comment la topologie du réseau influe-t-elle sur la diffusion de l'épidémie ?}
 \end{frame}
 
 \begin{frame}{Passons au modèle mathématique}
   \begin{itemize}
     \item Notons $\tau$ le taux de transmission de la maladie
-    \item Supposons que $i$ soit infecté par un noeud adjacent
-    \item $R_0$ est le nombre moyen de nouvelles infections causées par $i$,
+    \item Supposons que le noeud $j$ soit infecté par un noeud adjacent $i$
+    \item $R_0$ est le nombre moyen de nouvelles infections causées par $j$,
       soit
       \[
-        R_0 = \tau \EE\bc{\text{deg}(i) - 1}
+        R_0 := \tau \times (\text{nombre d'amis de Jeanne} - 1 )
       \]
-      (on enlève le noeud adjacent qui a transmis la maladie à Igor)
+      (on enlève le noeud adjacent $i$ qui a transmis la maladie à Jeanne)
   \end{itemize}
 
-  Calculons maintenant $\EE\bc{\text{deg}(i) - 1}$ pour avoir $R_0$
+  \vspace{.5cm}
+  Sur le graphe, notons le nombre moyen d'amis comme
+  \[
+    \EE\nc{K} := \sum_{k=1}^\infty k p(k)
+  \]
+  % Calculons maintenant $\EE\bc{\text{deg}(i) - 1}$ pour avoir $R_0$
 \end{frame}
 
 \begin{frame}{Le paradoxe de l'amitié}
-  Attention !
+  Attention ! Sur le graphe
   \[
-    \EE\bc{\text{deg}(Igor)} \neq \EE\bc{\text{degree of random node}} = \sum_{k=0}^\infty k p(k)
+    \text{nombre moyen d'amis} \neq \text{nombre moyen d'amis de mes amis}
   \]
+  et Jeanne est une amie d'Igor ...
+  \pause
 
   \begin{block}{Le paradoxe de l'amitié}
     Mes amis ont en moyenne plus d'amis que moi
   \end{block}
-  \textbf{Preuve. }\\
-  Igor \emph{n'est pas} un noeud aléatoire, mais un noeud atteint par une \emph{arête aléatoire} \\
+  {\footnotesize
+    \begin{itemize}
+      \item Jeanne \emph{n'est pas} un noeud aléatoire, mais un noeud atteint \\
+        par une \emph{arête aléatoire}
+      \item En moyenne, les noeuds avec une connectivité élevée ont une probabilité plus grande
+        d'être atteint par une arête prise de manière aléatoire
+      \item Dans l'ensemble, chaque noeud $j$
+        \begin{itemize}
+          {\footnotesize
+          \item apparaît comme ami d'ami $\text{deg}(j)$ fois
+          \item et contribue pour un nombre d'amis égal à $\text{deg}(j)$ \\
+            à la moyenne du nombre d'amis d'ami
+          }
+      \end{itemize}
+  \end{itemize}
+  }
 
-  En moyenne, les noeuds avec une connectivité élevée ont une probabilité plus grande
-  d'être atteint par une arête prise de manière aléatoire \\
+\end{frame}
 
+\begin{frame}{Nombre moyen d'amis d'ami}
+
+  {\small
+  On a alors, si on note $m_2$ le nombre moyen d'amis d'ami
   \[
-    \PP\bp{\text{deg}(Igor) = k} = \dfrac{k p(k)}{\sum_{k=1}^\infty k p(k)}
+    m_2 = \dfrac{\sum_{v \in \cV} \text{deg}^2(v)}{\sum_{v \in \cV} \text{deg}(v)}
   \]
-  puis nous prouvons le paradoxe en prenant l'espèrance de cette loi
+
+  Or nous avons $\sum_{v \in \cV} \text{deg}(v) = \sum_{k=1}^\infty kp(k)$. D'où
+  \[
+    m_2 = \dfrac{\sum_{k=1}^\infty k^2 p(k)}{\sum_{k=1}^\infty k p(k)}
+  \]
+
+  \vspace{.2cm}
+  Par Cauchy-Schwarz, on peut montrer que
+  \[
+    \Bp{\sum_{k=1}^\infty k p(k)}^2 \leq \underbrace{\sum_{k=1}^\infty p(k)}_{=1} \times \sum_{k=1}^\infty k^2 p(k)
+  \]
+
+  On prouve alors le paradoxe de l'amitié:
+  \[
+    \sum_{k=1}^\infty k p(k) \leq m_2
+  \]
+  }
 \end{frame}
 
 \begin{frame}{Retournons à notre $R_0$}
   On a alors
   \[
     \begin{aligned}
-      R_0 &= \tau \EE\bc{\text{deg}(i) - 1} \\
+      R_0 &= \tau \EE\bc{\text{Nombre d'amis de Jeanne} - 1} \\
           &= \tau \dfrac{\sum_{k=1}^\infty (k-1) k p(k)}{\sum_{k=1}^\infty k p(k)} \\
           &= \tau \dfrac{\EE\bc{K^2 - K}}{\EE\bc{K}}
     \end{aligned}
   \]
-  \vspace{.7cm}
+
+  \pause
+  \vspace{.6cm}
+  Or nous avons $\VV\nc{K} = \EE\nc{K^2} - \EE\nc{K}^2$.
   D'où
   \begin{block}{}
   \[
@@ -456,49 +520,77 @@
 
 \begin{frame}{Comment simuler l'épidémie sur un réseau ?}
   \begin{itemize}
-    \item En pratique, il est très difficile d'avoir accès à des graphes
-      réalistes (hormi pour Facebook et quelques opérateurs téléphoniques)
-    \item On se contente souvent de \emph{graphes aléatoires} pour les simulations !
-      Par exemple, en utilisant des graphes d'Erdös-Rényi
-  \end{itemize}
-
-  \begin{block}{Graphe d'Erdös-Rényi}
-    Soit $n\geq 1$ un entier, $p \in [0, 1]$ un paramètre\\
-    Les arêtes graphe aléatoire d'Erdös-Rényi $G = G(n, p)$ sont générées
-    de manière aléatoire et indépendante
-    \[
-      a_{ij} = 1 \quad \iff \quad X_{ij} = 1
-    \]
-    où $X_{ij}$ est une variable aléatoire suivant une loi de Bernouilli de paramètre $p$
-  \end{block}
-\end{frame}
-
-\begin{frame}{Vers les modèles agents}
-
-  {\footnotesize
-    \begin{columns}
-      \column{.3\textwidth}
-      \includegraphics[width=.9\textwidth]{conway}
-      \column{.7\textwidth}
+    \item \emph{Graphes aléatoires}
+      \begin{itemize}
+        \item En pratique, il est très difficile d'avoir accès à des graphes
+          réalistes (hormis pour Facebook et quelques opérateurs téléphoniques)
+        \item On se contente souvent de \emph{graphes aléatoires} pour les simulations !
+          Par exemple, en utilisant des graphes d'Erdös-Rényi
+      \end{itemize}
+    \item \emph{Modèles agents}
       \begin{itemize}
         \item Un modèle agent est une simulation avec $n$ agents où
           chacun des agents suit et interagit avec les autres agents suivant
           un comportement programmé
         \item Des comportements systèmiques peuvent parfois émerger des interactions
           individuelles
-        \item Le \emph{game of life} de Conway est un des modèles agents les plus connus,
-          aboutissants suivant l'initialisation à des comportements complexes des
-          automates cellulaires
       \end{itemize}
+  \end{itemize}
 
-    \end{columns}
-
-    \vspace{1cm}
-    Pour aller plus loin, voir la vidéo très intéressante de Guy Théraulaz : \emph{L'intelligence collective des sociétés animales}
-    \footnote{
-      \url{https://www.college-de-france.fr/site/colloque-2018/symposium-2018-10-19-11h50.htm}
-    }
-  }
+  % \begin{block}{Graphe d'Erdös-Rényi}
+  %   Soit $n\geq 1$ un entier, $p \in [0, 1]$ un paramètre\\
+  %   Les arêtes graphe aléatoire d'Erdös-Rényi $G = G(n, p)$ sont générées
+  %   de manière aléatoire et indépendante
+  %   \[
+  %     a_{ij} = 1 \quad \iff \quad X_{ij} = 1
+  %   \]
+  %   où $X_{ij}$ est une variable aléatoire suivant une loi de Bernouilli de paramètre $p$
+  % \end{block}
 \end{frame}
+
+\begin{frame}{Pour aller plus loin}
+
+  {\small
+  \begin{itemize}
+    \item La présentation de Cosma Shalizi dont cette conférence \\
+      est largement inspirée :  \\
+      \url{http://www.stat.cmu.edu/~cshalizi/dm/20/lectures/special/epidemics.html}
+    \item Sur la diffusion épidémique sur un graphe, voir l'interview \\
+      de Claire Mathieu:  \\
+      \url{https://lejournal.cnrs.fr/articles/des-graphes-pour-planifier-le-deconfinement}
+    \item Sur les graphes aléatoires, voir les travaux du CERMICS!
+    \item Sur les modèles agents, voir la présentation de Guy Theraulaz: \\
+      \url{https://www.college-de-france.fr/site/colloque-2018/symposium-2018-10-19-11h50.htm}
+  \end{itemize}
+  }
+
+\end{frame}
+% \begin{frame}{Vers les modèles agents}
+
+%   {\footnotesize
+%     \begin{columns}
+%       \column{.3\textwidth}
+%       \includegraphics[width=.9\textwidth]{conway}
+%       \column{.7\textwidth}
+%       \begin{itemize}
+%         \item Un modèle agent est une simulation avec $n$ agents où
+%           chacun des agents suit et interagit avec les autres agents suivant
+%           un comportement programmé
+%         \item Des comportements systèmiques peuvent parfois émerger des interactions
+%           individuelles
+%         \item Le \emph{game of life} de Conway est un des modèles agents les plus connus,
+%           aboutissants suivant l'initialisation à des comportements complexes des
+%           automates cellulaires
+%       \end{itemize}
+
+%     \end{columns}
+
+%     \vspace{1cm}
+%     Pour aller plus loin, voir la vidéo très intéressante de Guy Théraulaz : \emph{L'intelligence collective des sociétés animales}
+%     \footnote{
+%       \url{https://www.college-de-france.fr/site/colloque-2018/symposium-2018-10-19-11h50.htm}
+%     }
+%   }
+% \end{frame}
 
 \end{document}
